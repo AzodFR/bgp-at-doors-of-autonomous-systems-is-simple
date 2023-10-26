@@ -1,0 +1,26 @@
+- name: Test output of docker
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Get docker containers id
+      shell: >
+        docker ps -q
+      register: containers_id
+
+    - name: Get routeur container
+      shell: >
+        docker exec {{ item }} hostname | grep -qE "^tj_routeur" && echo {{ item }}
+      ignore_errors: true
+      failed_when: false
+      register: routeur_id
+      with_items: "{{ containers_id.stdout_lines }}"
+    
+    - name: Get routeur ps log
+      shell: >
+        docker exec {{ item }} ps
+      register: ps_logs
+      with_items: "{{ routeur_id.results | map(attribute='stdout_lines') | list  | flatten | select('match', '^\\S') | list}}"
+
+    - name: Print ps log
+      debug:
+        msg: "{{ ps_logs.results | map(attribute='stdout_lines') | list | flatten | select('match', '^\\S') | list }}"

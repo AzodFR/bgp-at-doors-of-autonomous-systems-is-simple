@@ -1,0 +1,1 @@
+find . -type f -name "*.yml" -exec sed -i -e "s?PWD?$PWD?g" {} +

@@ -1,0 +1,18 @@
+- name: Build Docker Image
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Build host image
+      docker_image:
+        name: tj_host
+        tag: latest
+        build:
+          path: PWD/p1/images/
+          dockerfile: PWD/p1/images/host.Dockerfile
+    - name: Build routeur image
+      docker_image:
+        name: tj_routeur
+        tag: latest
+        build:
+          path: PWD/p1/images/
+          dockerfile: PWD/p1/images/routeur.Dockerfile

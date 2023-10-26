@@ -1,0 +1,27 @@
+- name: Setup Machines
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Get docker containers id
+      shell: >
+        docker ps -q
+      register: containers_id
+
+    - name: Get hosts containers
+      shell: >
+        docker exec {{ item }} hostname | grep -qE "^tj_host" && echo {{ item }}
+      ignore_errors: true
+      failed_when: false
+      register: hosts_id
+      with_items: "{{ containers_id.stdout_lines }}"
+
+    - name: Ping others host
+      shell: >
+        docker cp PWD/p2/sh/ping.sh {{ item }}:/ping.sh && \
+        docker exec {{ item }} sh /ping.sh
+      register: ping_logs
+      with_items: "{{ hosts_id.results | map(attribute='stdout_lines') | list  | flatten | select('match', '^\\S') | list}}"
+
+    - name: Print ping log
+      debug:
+        msg: "{{ ping_logs.results | map(attribute='stdout_lines') | list | flatten | select('match', '^\\S') | list }}"
