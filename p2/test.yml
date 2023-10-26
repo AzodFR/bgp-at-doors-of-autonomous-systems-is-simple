@@ -1,4 +1,4 @@
-- name: Setup Machines
+- name: Test if hosts can ping each others
   hosts: localhost
   connection: local
   tasks:
